@@ -137,7 +137,7 @@ section:not(.rsvp):before,section:not(.rsvp):after{display:none!important;backgr
 .flower-right{transform:scaleX(-1);mask-image:radial-gradient(ellipse at 65% 30%,#000 0%,rgba(0,0,0,.96) 48%,rgba(0,0,0,.62) 68%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse at 65% 30%,#000 0%,rgba(0,0,0,.96) 48%,rgba(0,0,0,.62) 68%,transparent 100%);}
 
 /* RSVP panel restyled to match the supplied reference */
-.rsvp{padding:28px 20px 34px;background:transparent!important;border:0!important;color:#f7f3e8}
+.rsvp{padding:28px 10px 34px;background:transparent!important;border:0!important;color:#f7f3e8}
 .rsvp .container{max-width:980px!important;width:100%;padding:0!important}
 .rsvp .rsvp-panel{display:grid;grid-template-columns:40% 60%;align-items:stretch;overflow:hidden;border:2px solid #d8ad58;border-radius:28px;background:linear-gradient(135deg,#061a32 0%,#0b2341 55%,#06162b 100%);box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .rsvp .rsvp-copy{padding:22px 24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border-right:1px solid rgba(216,181,106,.45)}
@@ -254,42 +254,16 @@ section.rsvp#rsvp form#rsvpForm .submit{width:100%!important}
   <form action="https://script.google.com/macros/s/AKfycbwCIZySdnA07q26g-cOh40OyWz4rlSGrbNApWnPSEfG9oN-1LteBXididp824FKf0GU/exec" id="rsvpForm" method="POST" target="rsvpSubmitFrame">
     <label for="name">Full Name *</label>
     <input id="name" name="name" placeholder="Full Name *" aria-label="Full Name" required=""/>
-    <label for="email">Email Address *</label>
-    <input id="email" name="email" type="email" placeholder="Email Address *" aria-label="Email Address" required=""/>
-    <label for="guests">Number of Guests *</label>
-    <select id="guests" name="guests" aria-label="Number of Guests" required="">
-      <option value="">Number of Guests *</option><option value="1">1 Guest</option><option value="2">2 Guests</option><option value="3">3 Guests</option><option value="4">4 Guests</option><option value="5">5 Guests</option><option value="6">6 Guests</option>
     </select>
     <label for="attendance">Will you attend? *</label>
     <select id="attendance" name="attendance" aria-label="Will you attend?" required="">
       <option value="">Will you attend? *</option><option value="Yes, I will attend">Yes, I will attend</option><option value="Sorry, I cannot attend">Sorry, I cannot attend</option>
     </select>
-    <div id="seniorCitizenField" style="display:none;grid-column:1/-1">
-      <label for="senior_citizen">Are you a senior citizen (60 years old or above) or a PWD (Person with disability)? *</label>
-      <select id="senior_citizen" name="senior_citizen" aria-label="Senior citizen or PWD">
-        <option value="">Senior Citizen / PWD? *</option><option value="Yes">Yes</option><option value="No">No</option>
-      </select>
-    </div>
-    <label for="message">Message (optional)</label>
-    <textarea id="message" name="message" placeholder="Message (optional)" aria-label="Message (optional)"></textarea>
+  </select>
     <button class="submit" type="submit">SUBMIT RSVP&nbsp; ›</button>
   </form>
 </div>
-<script>
-const attendanceSelect = document.getElementById("attendance");
-const seniorCitizenField = document.getElementById("seniorCitizenField");
-const seniorCitizenSelect = document.getElementById("senior_citizen");
-function updateSeniorCitizenQuestion() {
-  const attending = attendanceSelect.value === "Yes, I will attend";
-  seniorCitizenField.style.display = attending ? "block" : "none";
-  seniorCitizenSelect.required = attending;
-  if (!attending) seniorCitizenSelect.value = "";
-}
-attendanceSelect.addEventListener("change", updateSeniorCitizenQuestion);
-updateSeniorCitizenQuestion();
-</script>
 <div id="confirmation">Thank you! Your RSVP has been submitted successfully.
-  <div id="seniorMessage"><br/><strong>Please bring your Senior Citizen ID card / PWD ID with you at the venue.</strong></div>
 </div>
 <iframe id="rsvpSubmitFrame" name="rsvpSubmitFrame" style="display:none" title="RSVP submission"></iframe>
 </div></section>
