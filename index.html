@@ -211,6 +211,48 @@ section.rsvp#rsvp form#rsvpForm .submit{width:100%!important}
  section.rsvp#rsvp form#rsvpForm{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;padding:14px!important}
 }
 
+
+/* RSVP border repair: draw a continuous gold frame above conflicting styles. */
+section.rsvp#rsvp .rsvp-panel{
+  position:relative!important;
+  border:2px solid #e7b34f!important;
+  outline:1px solid rgba(255,220,151,.45)!important;
+  outline-offset:-5px!important;
+  border-radius:28px!important;
+  overflow:hidden!important;
+  background:linear-gradient(135deg,#061a32 0%,#0b2341 55%,#06162b 100%)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,220,151,.22),0 8px 24px rgba(0,0,0,.18)!important;
+}
+section.rsvp#rsvp .rsvp-copy,
+section.rsvp#rsvp form#rsvpForm{position:relative!important;min-width:0!important;}
+@media(max-width:650px){section.rsvp#rsvp .rsvp-panel{border-radius:22px!important;outline-offset:-5px!important;}}
+
+
+/* Definitive RSVP gold frame: use an overlay so grid children cannot cover the edges. */
+section.rsvp#rsvp .rsvp-panel{
+  position:relative!important;
+  isolation:isolate!important;
+  border:2px solid #e8b84f!important;
+  border-radius:28px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+section.rsvp#rsvp .rsvp-panel::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  border:2px solid #e8b84f!important;
+  border-radius:inherit!important;
+  box-sizing:border-box!important;
+  pointer-events:none!important;
+  z-index:20!important;
+}
+section.rsvp#rsvp .rsvp-copy,
+section.rsvp#rsvp form#rsvpForm{z-index:1!important;}
+@media(max-width:650px){
+  section.rsvp#rsvp .rsvp-panel{border-radius:22px!important;}
+}
 </style>
 </head>
 <body>
@@ -254,12 +296,10 @@ section.rsvp#rsvp form#rsvpForm .submit{width:100%!important}
   <form action="https://script.google.com/macros/s/AKfycbwCIZySdnA07q26g-cOh40OyWz4rlSGrbNApWnPSEfG9oN-1LteBXididp824FKf0GU/exec" id="rsvpForm" method="POST" target="rsvpSubmitFrame">
     <label for="name">Full Name *</label>
     <input id="name" name="name" placeholder="Full Name *" aria-label="Full Name" required=""/>
-    </select>
     <label for="attendance">Will you attend? *</label>
     <select id="attendance" name="attendance" aria-label="Will you attend?" required="">
       <option value="">Will you attend? *</option><option value="Yes, I will attend">Yes, I will attend</option><option value="Sorry, I cannot attend">Sorry, I cannot attend</option>
     </select>
-  </select>
     <button class="submit" type="submit">SUBMIT RSVP&nbsp; ›</button>
   </form>
 </div>
@@ -269,19 +309,48 @@ section.rsvp#rsvp form#rsvpForm .submit{width:100%!important}
 </div></section>
 <footer>With love, we look forward to celebrating this special milestone with you.</footer>
 <script>
-const eventDate=new Date('October 24, 2026 13:00:00').getTime();function update(){const d=eventDate-Date.now();
-if(d<=0){document.getElementById('countdown').innerHTML='<p style="grid-column:1/-1;text-align:center">The celebration is here! 🎉</p>';
-return}days.textContent=Math.floor(d/86400000);
-hours.textContent=Math.floor(d/3600000)%24;
-minutes.textContent=Math.floor(d/60000)%60;
-seconds.textContent=Math.floor(d/1000)%60}update();
-setInterval(update,1000);const form=document.getElementById('rsvpForm');
+const eventDate=new Date('October 24, 2026 13:00:00').getTime();
+function update(){
+  const d=eventDate-Date.now();
+  if(d<=0){document.getElementById('countdown').innerHTML='<p style="grid-column:1/-1;text-align:center">The celebration is here! 🎉</p>';return;}
+  document.getElementById('days').textContent=Math.floor(d/86400000);
+  document.getElementById('hours').textContent=Math.floor(d/3600000)%24;
+  document.getElementById('minutes').textContent=Math.floor(d/60000)%60;
+  document.getElementById('seconds').textContent=Math.floor(d/1000)%60;
+}
+update();
+setInterval(update,1000);
+
+const form=document.getElementById('rsvpForm');
 const confirmation=document.getElementById('confirmation');
-form.addEventListener('submit',()=>{const button=form.querySelector('.submit');
-button.disabled=true;button.textContent='Submitting...';
-setTimeout(()=>{confirmation.style.display='block';
-document.getElementById('seniorMessage').style.display=(document.getElementById('senior_citizen').value==='Yes')?'block':'none';
-confirmation.scrollIntoView({behavior:'smooth',block:'center'});form.reset();
-button.disabled=false;button.textContent='Submit RSVP'},700)});
+const submitFrame=document.getElementById('rsvpSubmitFrame');
+const submitButton=form.querySelector('.submit');
+let rsvpSubmitting=false;
+let fallbackTimer=null;
+function finishRsvpSubmission(){
+  if(!rsvpSubmitting) return;
+  rsvpSubmitting=false;
+  if(fallbackTimer) clearTimeout(fallbackTimer);
+  form.reset();
+  submitButton.disabled=false;
+  submitButton.textContent='SUBMIT RSVP ›';
+}
+form.addEventListener('submit',()=>{
+  // The browser only fires submit after required fields pass validation.
+  rsvpSubmitting=true;
+  submitButton.disabled=true;
+  submitButton.textContent='Submitting...';
+  confirmation.textContent='Thank you! Your RSVP is being submitted. If you do not see your response recorded, please try again.';
+  confirmation.style.display='block';
+  confirmation.scrollIntoView({behavior:'smooth',block:'center'});
+  // Some Google Apps Script responses do not trigger a reliable iframe load event;
+  // restore the form after a short fallback so it cannot remain stuck on “Submitting”.
+  fallbackTimer=setTimeout(finishRsvpSubmission,4000);
+});
+submitFrame.addEventListener('load',()=>{
+  if(!rsvpSubmitting) return;
+  confirmation.textContent='Thank you! Your RSVP has been submitted. If you do not see your response recorded, please try again.';
+  finishRsvpSubmission();
+});
 </script>
 </body></html>
